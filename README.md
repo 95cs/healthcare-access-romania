@@ -339,6 +339,56 @@ After excluding Bucharest: 3,180 localities, between 109 and 370,437 inhabitants
 
 ---
 
+## The dashboard
+
+Two pages, built for two different readers. Most reports try to serve both at once and end up
+serving neither: a screen full of filters with no conclusion anywhere.
+
+### Page 1 — Recommendation
+
+![Recommendation page](docs/dashboard_page1_recommendation.png)
+
+For the person making the decision. The title states the conclusion rather than the subject,
+three figures give the scale, and the chart and table give the answer. **No filters at all** —
+someone allocating a budget reads, they do not explore.
+
+### Page 2 — Explore
+
+![Explore page](docs/dashboard_page2_explore.png)
+
+For the analyst who wants to challenge it. Filters first, then the evidence.
+
+The scatter plot is the most useful visual in the report: it shows that the two things being
+measured are entangled. Localities with no doctor and no pharmacy (dark purple) cluster to the
+left — small populations — and the whole cloud slopes downward, because smaller localities are
+older. Below 1,000 inhabitants, 44% of localities have neither service; above 20,000, none do.
+
+That makes the threshold decision visible rather than asserted. There is no natural break in
+the cloud, so 1,000 is a judgement, and the chart shows exactly what that judgement costs.
+
+The population slider matters more than it looks: it lets someone move the threshold from 1,000
+to 1,500 and watch the shortlist change. The report hands the reader the tool to disagree with
+its own recommendation.
+
+The detail table carries `Pharmacies` and `Pharmacy points` as separate columns on purpose. A
+reader can find NECSESTI — `Has pharmacy = True`, `Pharmacies = 0`, `Pharmacy points = 1` — and
+see for themselves that the indicator counts pharmacy points, without having to read this file.
+
+### Built on the web, with constraints
+
+Power BI Desktop is Windows-only, so the report was built in the browser on Power BI Service.
+Two tenant settings shaped the result:
+
+- **Map visuals are disabled** on this tenant, and enabling them needs an administrator role the
+  account does not have. The geography is carried by the per-county bar chart instead. For ten
+  localities a ranked table reads better than ten dots anyway; what is lost is the at-a-glance
+  sense of where in the country they sit.
+- Locality-level mapping would have needed coordinates regardless — the SIRUTA code carries
+  none, and 239 locality names repeat across counties, so a name-based geocode would have placed
+  points silently wrong.
+
+---
+
 ## Project layout
 
 ```
@@ -401,4 +451,4 @@ hold. The notebooks remain as the record of how the logic was worked out.
 
 **Next**
 - [ ] Source 3 — medical staff (SAN104B)
-- [ ] Power BI dashboard — serving dataset ready, report in progress
+- [x] Power BI dashboard — two pages, published as screenshots in `docs/`
