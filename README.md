@@ -1,32 +1,55 @@
-# Access to Healthcare in Rural Romania
+# Healthcare Access in Romania
 
-Locality-level analysis of the relationship between population ageing and access to medical
-services, built to support a decision about where to open new medical centres.
+Locality-level analysis across all 3,180 territorial units, relating population ageing to the
+presence of basic medical services, built to support a decision about where to open new
+medical centres.
 
-Every figure below is reproducible from the raw data in this repository with three commands.
+No rural filter is applied — see *Scope*. The ten localities in the result are all communes,
+but that is an outcome of the analysis, not a criterion of it.
+
+Every figure below is reproducible from the raw data in this repository with four commands.
 
 ---
 
 ## The question
 
-> **The Ministry of Health has to decide where to open 10 new medical centres. In which
-> localities do a large elderly population, distance to the nearest hospital, and below-average
-> medical staffing overlap most strongly?**
+> **The Ministry of Health has to decide where to open 10 new medical centres. Which localities
+> combine the largest elderly populations with no family doctor and no pharmacy?**
 
 It has a decision-maker allocating a fixed budget, a concrete action attached (a shortlist of
-localities), it needs three sources that do not line up naturally, and the answer is not
-guessable in advance.
+localities), it needs two sources that do not line up naturally, and the answer is not guessable
+in advance.
 
-### Still open in that formulation
+### What "access" means here
 
-| Open question | Why it matters |
-|---|---|
-| What distance counts as "far"? | The threshold (25 km? 30?) changes the final list and has to be defended |
-| How do the three criteria combine? | A filter joined by AND could return 3 localities or 400. Producing a *top 10* requires a prioritisation rule, and the weights chosen will be the first thing anyone asks about |
-| Straight-line distance or road distance? | In Hunedoara, Caraș-Severin and the Apuseni mountains — exactly where the oldest under-served communes are — the difference is large |
+**The presence of a family-medicine practice and of a pharmacy in the locality itself.** Nothing
+more. It is a crude proxy, chosen because it is the finest-grained thing the available data can
+actually support, and it is stated plainly so that no reader mistakes it for a measure of
+distance, travel time, or quality of care.
 
-The distance criterion is not yet implemented: it needs geographic coordinates, which the
-SIRUTA code does not carry. See *Data sources*, row 4.
+### The original question was wider
+
+This project started from a three-criteria question: elderly population, **distance to the
+nearest hospital**, and **medical staffing below the national average**. Two of those three were
+dropped, deliberately, once the data made the cost of keeping them clear.
+
+| Dropped criterion | Why | What it would take |
+|---|---|---|
+| Distance to the nearest hospital | The SIRUTA code carries no coordinates, and 239 locality names repeat across counties, so name-based geocoding would place points silently wrong | A SIRUTA → latitude/longitude source (source 4), coordinates for every hospital, and a decision between straight-line and road distance — which differs sharply in Hunedoara, Caraș-Severin and the Apuseni mountains |
+| Medical staffing per capita | Not started | INS TEMPO matrix SAN104B (source 3), which does reach locality level |
+
+Narrowing the question was a scope decision, not an oversight. The delivered analysis answers
+less than the original question asked, and answers it with data that exists.
+
+### What a fuller version would need
+
+- **Source 4** — geographic coordinates per SIRUTA code, plus hospital locations
+- **Source 3** — SAN104B, medical staff by locality
+- **A distance threshold** — what counts as "far"? 25 km? 30? The number changes the list and
+  has to be defended
+- **A distance metric** — straight-line or road. In mountainous counties these are not close
+- **A revised prioritisation rule** — the current one ranks on a single axis; three criteria
+  would need weights, and the weights would be the first thing anyone questions
 
 ---
 
@@ -73,8 +96,11 @@ nor isolation, nor actual access.
 - 120 towns and municipalities have fewer than 10,000 inhabitants; `ORAS BAILE TUSNAD` (1,550)
   is smaller than the median of the working set.
 
-The decision waits until the health-unit source shows how access is actually distributed. A
-size-based or access-based criterion may serve better than the administrative one.
+The health-unit source has since been processed, and it supports that reasoning: 44% of
+localities under 1,000 inhabitants have neither service, against 0.9% of those between 2,000 and
+5,000. Size predicts access far better than the administrative label does. The filter stays
+unapplied, and the population threshold in the prioritisation rule does the work instead —
+applied at the point where it answers a question about feasibility rather than about scope.
 
 ---
 
@@ -85,7 +111,7 @@ size-based or access-based criterion may serve better than the administrative on
 | 1 | INS TEMPO, matrix POP107D | Population by age group, 2026, both sexes | locality (SIRUTA code) | ✅ 42/42 files, processed and validated |
 | 2 | INS TEMPO, matrix SAN101B | Health units by category and ownership, 2024 | locality (SIRUTA code) | ✅ 41/42 files downloaded |
 | 3 | INS TEMPO, matrix SAN104B | Medical staff | locality | ⬜ not started |
-| 4 | _(to be determined)_ | Geographic coordinates per SIRUTA code | locality | ⬜ required for the distance criterion |
+| 4 | _(to be determined)_ | Geographic coordinates per SIRUTA code | locality | ⬜ would be required to restore the distance criterion |
 
 **Source 1.** 42 CSV exports (41 counties plus Bucharest), downloaded manually from TEMPO.
 Age groups selected: `Total`, `65-69`, `70-74`, `75-79`, `80-84`, `85+`. 19,086 raw rows →
@@ -94,9 +120,11 @@ Age groups selected: `Total`, `65-69`, `70-74`, `75-79`, `80-84`, `85+`. 19,086 
 **Source 2.** 41 CSV exports, one per county. Bucharest is missing deliberately — it is
 excluded from locality-level analysis anyway.
 
-**Source 4 was not part of the original plan.** The distance criterion in the business question
-requires coordinates for both localities and hospitals, and the SIRUTA code carries none. It is
-a geospatial component that materially widens the scope of the project.
+**Sources 3 and 4 are not used.** They are what the original, wider question would have needed
+— staffing per capita and distance to the nearest hospital. The distance criterion requires
+coordinates for both localities and hospitals, and the SIRUTA code carries none; that is a
+geospatial component which materially widens the scope. Both criteria were dropped rather than
+approximated. See *The original question was wider*.
 
 ---
 
@@ -444,11 +472,15 @@ hold. The notebooks remain as the record of how the logic was worked out.
 - [x] Access indicators, on two axes
 - [x] Prioritisation rule — 1,000-inhabitant threshold, at most 2 per county
 
-**Scope decisions still open**
-- [ ] Narrow the analysis to rural localities? (see *Scope*)
-- [ ] Keep the distance criterion? It requires source 4 and geocoding
-- [ ] What distance threshold counts as poor access?
-
-**Next**
-- [ ] Source 3 — medical staff (SAN104B)
+**Scope decisions taken**
+- [x] Locality level, all 3,180 units — no rural filter, because the administrative
+      classification tracks neither size nor isolation (see *Scope*)
+- [x] Distance to the nearest hospital — **dropped**. Needs coordinates the SIRUTA code does
+      not carry, and name-based geocoding is unsafe with 239 repeated locality names
+- [x] Medical staffing per capita — **dropped**, source 3 not started
 - [x] Power BI dashboard — two pages, published as screenshots in `docs/`
+
+**Possible extensions**
+- [ ] Source 3 — medical staff by locality (SAN104B)
+- [ ] Source 4 — SIRUTA coordinates, which would restore the distance criterion
+- [ ] Revisit the rural filter using a size or access criterion rather than the administrative one
